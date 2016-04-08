@@ -53,7 +53,7 @@ valid_classifiers = {
 def main(classifier_name,
          classifier_args=None,
          ngram=2,
-         folds=6,
+         folds=5,
          preprocessed=False,
          preprocessed_2=False
          ):
@@ -146,7 +146,7 @@ if __name__ == '__main__':
       print(classifier_name)
       print(classifier_args)
       print('=======================================')
-      iteration = 5
+      iteration = 1
       preprocessed2Score =0 
       preprocessedScore =0
       unpreprocessedScore=0

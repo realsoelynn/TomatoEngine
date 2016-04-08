@@ -78,6 +78,11 @@ def preprocess_word(word, pos_tag, stopword=False, filtered_post_tag=False, lemm
   if filtered_post_tag and pos_tag != None and pos_tag in FILTERED_POS_TAG:
     return ""
 
+  
+
+  if lemmatize and wordnet_pos_code(pos_tag) == wordnet.NOUN:
+    word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
+  
   if basic_word and pos_tag.startswith("NN"):
     wordbf=  word
     basicWord = basictizer.check_basic(word)
@@ -85,9 +90,9 @@ def preprocess_word(word, pos_tag, stopword=False, filtered_post_tag=False, lemm
       if basicWord != word:
         print(word + " >> " + basicWord)
       word = basicWord
+      if lemmatize and wordnet_pos_code(pos_tag) == wordnet.NOUN:
+        word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
 
-  if lemmatize and wordnet_pos_code(pos_tag) == wordnet.NOUN:
-    word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
 
   if(word == 'w/a'):
     word = 'with a'
