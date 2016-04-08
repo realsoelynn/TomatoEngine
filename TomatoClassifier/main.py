@@ -30,6 +30,7 @@ from sklearn.tree import DecisionTreeClassifier
 import nltk
 import numpy
 import os
+import csv
 
 import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -46,13 +47,13 @@ valid_classifiers = {
     "svc": SVC,
     "voting": VotingClassifier,
     "BernoulliNB": BernoulliNB,
-    "GaussianNB": GaussianNB
+    "GaussianNB": GaussianNB,
 }
 
 def main(classifier_name,
          classifier_args=None,
          ngram=2,
-         folds=3,
+         folds=6,
          preprocessed=False,
          preprocessed_2=False
          ):
@@ -90,12 +91,12 @@ def main(classifier_name,
             # "Classifier__loss" : ['hinge', 'log', 'modified_huber', 'squared_hinge', 'perceptron'],
           }
   ml_pipeline = Pipeline([
-                    # ('tfidf', TfidfVectorizer(sublinear_tf=True)),
-                    ('Vectorization', CountVectorizer(binary='false')),
+                    ('tfidf', TfidfVectorizer(sublinear_tf=True)),
+                    # ('Vectorization', CountVectorizer(binary='false')),
                     # ('Feature Refinement', TfidfTransformer(use_idf=False)),
                     # ('Feature Selection', SelectKBest(chi2, 100)),
                     ('Feature Reduction', ClassifierOvOFeaturesReduction()),
-                    ('Classifier', classifier),
+                    ('Classifier', classifier)
                     ])
 
   gs = GridSearchCV(ml_pipeline, params, cv = folds, verbose=2, n_jobs=-1)
@@ -104,12 +105,12 @@ def main(classifier_name,
   return(gs.best_score_)
 
 if __name__ == '__main__':
-  classifier_name = "decisiontree"
-  classifier_args = {"max_depth": 10}
+  # classifier_name = "decisiontree"
+  # classifier_args = {"max_depth": 10}
 
   # classifier_name = "knn"
   # classifier_args = {}
-    
+
   # classifier_name = "extratree"
   # classifier_args = {"n_jobs": -1}
 
@@ -119,29 +120,42 @@ if __name__ == '__main__':
   # classifier_name = "linearsvc"
   # classifier_args = {} #{ "class_weight": { 0: 1, 1: 100, 2: 1} }
 
-  # classifier_name = "BernoulliNB"
-  # classifier_args = {}
+  classifier_name = "BernoulliNB"
+  classifier_args = {}
 
   # classifier_name = "GaussianNB"
   # classifier_args = {}
-  if 'classifier_name' not in locals() or 'classifier_args' not in locals():
-    print('Please uncomment a classifier')
-    import sys
-    sys.exit()
 
-  print('=======================================')
-  print(classifier_name)
-  print(classifier_args)
-  print('=======================================')
-  iteration = 5
-  preprocessed2Score =0 
-  preprocessedScore =0
-  unpreprocessedScore=0
-  for i in range(iteration):
-    preprocessed2Score += main(classifier_name, classifier_args, preprocessed = True, preprocessed_2 = True, ngram=1)
-    preprocessedScore += main(classifier_name, classifier_args, preprocessed = True, preprocessed_2 = False, ngram=2)
-    unpreprocessedScore += main(classifier_name, classifier_args, preprocessed = False, preprocessed_2 = False, ngram=2)
-  print(preprocessed2Score/iteration)
-  print(preprocessedScore/iteration)
-  print(unpreprocessedScore/iteration)
+  classifier_names = ["GaussianNB", "BernoulliNB", "linearsvc","sgd","extratree","knn", "decisiontree"]
+  classifier_argss = [{} , {},  {"C":1}, {"loss":"log", "penalty":"elasticnet"}, {"n_jobs": -1},{}, {"max_depth": 10}]
+  i=0
+  with open('data/results.csv', 'w') as result_file:
+    writer = csv.writer(result_file)
+    header = 'classifier','preprocessed','unprocessed'
+    writer.writerow(header)
+    for classifier_name in classifier_names:
+      classifier_args = classifier_argss[i]
 
+
+      if 'classifier_name' not in locals() or 'classifier_args' not in locals():
+        print('Please uncomment a classifier')
+        import sys
+        sys.exit()
+
+      print('=======================================')
+      print(classifier_name)
+      print(classifier_args)
+      print('=======================================')
+      iteration = 5
+      preprocessed2Score =0 
+      preprocessedScore =0
+      unpreprocessedScore=0
+      for v in range(iteration):
+        # preprocessed2Score += main(classifier_name, classifier_args, preprocessed = True, preprocessed_2 = True, ngram=1)
+        preprocessedScore += main(classifier_name, classifier_args, preprocessed = True, preprocessed_2 = False, ngram=2)
+        unpreprocessedScore += main(classifier_name, classifier_args, preprocessed = False, preprocessed_2 = False, ngram=2)
+      # print(preprocessed2Score/iteration)
+      # print(preprocessedScore/iteration)
+      # print(unpreprocessedScore/iteration)
+      writer.writerow((classifier_name, preprocessedScore/iteration, unpreprocessedScore/iteration))
+      i+=1
