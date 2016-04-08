@@ -86,7 +86,7 @@ def preprocess_word(word, pos_tag, stopword=False, filtered_post_tag=False, lemm
         print(word + " >> " + basicWord)
       word = basicWord
 
-  if lemmatize and wordnet_pos_code(pos_tag) != "":
+  if lemmatize and wordnet_pos_code(pos_tag) == wordnet.NOUN:
     word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
 
   if(word == 'w/a'):
@@ -121,7 +121,7 @@ if __name__ == '__main__':
   # Preprocess train data
   records = load_data('data/reviews.tsv')
 
-  preprocess_records = [preprocess(record, stopword=False, basic_word = True, lemmatize=False) for record in records]
+  preprocess_records = [preprocess(record, stopword=False, basic_word = True, lemmatize=True) for record in records]
 
   with open('data/preprocessed_reviews.tsv', 'w') as preprocess_file:
     header = 'id\treview\tsentiment\n'
