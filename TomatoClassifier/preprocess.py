@@ -90,8 +90,7 @@ def preprocess_word(word, pos_tag, stopword=False, filtered_post_tag=False, lemm
       if basicWord != word:
         print(word + " >> " + basicWord)
       word = basicWord
-      if lemmatize and wordnet_pos_code(pos_tag) == wordnet.NOUN:
-        word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
+      word = lemmatizer.lemmatize(word, wordnet_pos_code(pos_tag))
 
 
   if(word == 'w/a'):
@@ -109,7 +108,7 @@ def preprocess_word(word, pos_tag, stopword=False, filtered_post_tag=False, lemm
 
   return word
 
-def preprocess(record, stopword=False, filtered_post_tag=False, basic_word = False, lemmatize=True):
+def preprocess(record, stopword=False, filtered_post_tag=False, basic_word = True, lemmatize=True):
   review_str = record['review'].decode('UTF-8')
   review_str = review_str.replace('.', '. ')
 
@@ -118,15 +117,14 @@ def preprocess(record, stopword=False, filtered_post_tag=False, basic_word = Fal
   preprocessed_string = [preprocess_word(word, pos_tag, stopword, filtered_post_tag, lemmatize, basic_word)
                          for (word, pos_tag) in nltk.tag._pos_tag(tokens, None, tagger)]
   preprocessed_string = [word for word in preprocessed_string if word != ""]
-
   record['review'] = u' '.join(preprocessed_string).encode('utf-8').strip()
   return record
 
-if __name__ == '__main__':
+def preprocessMain(stopword=False, basic_word = True, lemmatize=True):
   # Preprocess train data
   records = load_data('data/reviews.tsv')
 
-  preprocess_records = [preprocess(record, stopword=False, basic_word = True, lemmatize=True) for record in records]
+  preprocess_records = [preprocess(record, stopword=stopword, basic_word = basic_word, lemmatize=lemmatize) for record in records]
 
   with open('data/preprocessed_reviews.tsv', 'w') as preprocess_file:
     header = 'id\treview\tsentiment\n'
@@ -139,3 +137,10 @@ if __name__ == '__main__':
       except UnicodeEncodeError:
         print("unicode encode error")
         continue
+  import sys
+  sys.stdout.flush()
+
+
+if __name__ == '__main__':
+  preprocessMain()
+  
